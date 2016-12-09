@@ -1,4 +1,6 @@
 FROM ubuntu:xenial
+MAINTAINER Kevin Wittek <kevin.wittek@groovy-coder.com>
+
 
 RUN apt update && apt -y install apt-transport-https ca-certificates curl
 RUN apt-key adv \
