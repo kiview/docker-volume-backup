@@ -1,5 +1,6 @@
 #!/bin/bash
 
+alpine=alpine:3.6
 compose_file_path=$1
 project_name=${2,,}
 backup_path=$3
@@ -13,7 +14,7 @@ function backup_volume {
   backup_destination=$2
   date_suffix=$(date -I)
 
-  docker run --rm -v $volume_name:/data -v $backup_destination:/backup ubuntu tar -zcvf /backup/$volume_name-$date_suffix.tar /data
+  docker run --rm -v $volume_name:/data -v $backup_destination:/backup $alpine tar -zcvf /backup/$volume_name-$date_suffix.tar /data
 }
 
 function restore_volume {
@@ -21,8 +22,8 @@ function restore_volume {
   backup_destination=$2
   date=$3
 
-  docker run --rm -v $volume_name:/data ubuntu find /data -mindepth 1 -delete
-  docker run --rm -v $volume_name:/data -v $backup_destination:/backup ubuntu tar -xvf /backup/$volume_name-$date.tar -C .
+  docker run --rm -v $volume_name:/data $alpine find /data -mindepth 1 -delete
+  docker run --rm -v $volume_name:/data -v $backup_destination:/backup $alpine tar -xvf /backup/$volume_name-$date.tar -C .
 }
 
 function main {
