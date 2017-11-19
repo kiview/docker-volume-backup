@@ -100,7 +100,7 @@ function main {
   docker-compose -f $compose_file_path -p $project_name start
 
   # write date_id to file
-  echo "$date_suffix" >> "$backup_path/stored-backups.ids"
+  echo "$date_suffix    $project_name" >> "$backup_path/stored-backups.ids"
 
   echo "finished"
 }
