@@ -31,7 +31,9 @@ function main {
   docker-compose -f $compose_file_path -p $project_name stop
 
   echo "Mounting volumes and performing backup/restore..."
-  volumes=($(docker volume ls -f name=$project_name | awk '{if (NR > 1) print $2}'))
+  declare -a volumes=()
+  readarray -t volumes < <(docker volume ls -f name=$project_name | awk '{if (NR > 1) print $2}')
+
   for v in "${volumes[@]}"
   do
     if [ "$backup_or_restore" == "backup" ]

@@ -36,14 +36,16 @@ PROJECT_DIR   # path to directory that contains the docker files, e.g. docker-co
 PROJECT_NAME  # Name of the docker container, default is the directory name where docker-compose.yml is stored
 BACKUP_DIR    # directory where the tar-files are stored / readed
 MODE          # backup or restore
-DATE          # if MODE=backup than the date who should restore
+DATE          # if MODE=restore than the date who should restore
 
+# $MODE=backup
 docker run                                            \
     -v "$PROJECT_DIR:/project"                        \
     -v "$BACKUP_DIR:/backup"                          \
     -v /var/run/docker.sock:/var/run/docker.sock      \
     docker_volume_backup:latest $PROJECT_NAME /backup $MODE
 
+# $MODE=restore
 docker run                                            \
     -v "$PROJECT_DIR:/project"                        \
     -v "$BACKUP_DIR:/backup"                          \
