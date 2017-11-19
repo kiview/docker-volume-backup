@@ -3,21 +3,22 @@ Scripts for easy backup and restore of Docker volumes
 
 ## Usage
 
-```
+```bash
 ./docker_volume_backup.sh {compose_file_path} {project_name} {backup_path} {backup_or_restore} {restore_date}
 ```
+Note: The compose file is not parsed yet. The containing scripts only wokrs with default names for the volumes (containers). Check after each update manuelly if the script works correctly.
 
 ## Examples
 
 Backup
 
-```
+```bash
 ./docker_volume_backup.sh /home/kiview/Gitlab/docker-compose.yml gitlab $(pwd)/backup backup
 ```
 
 Restore
 
-```
+```bash
 ./docker_volume_backup.sh /home/kiview/Gitlab/docker-compose.yml gitlab $(pwd)/backup restore 2016-10-19
 ```
 
@@ -25,13 +26,13 @@ Restore
 
 After building your container,
 
-```
+```bash
 docker build -t docker_volume_backup .
 ```
 
 you can use it like this:
 
-```
+```bash
 PROJECT_DIR   # path to directory that contains the docker files, e.g. docker-compose.yml, Dockerfile, ...
 PROJECT_NAME  # Name of the docker container, default is the directory name where docker-compose.yml is stored
 BACKUP_DIR    # directory where the tar-files are stored / readed
