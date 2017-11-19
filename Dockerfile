@@ -1,14 +1,15 @@
 FROM alpine:3.6
+MAINTAINER Kevin Wittek <kevin.wittek@groovy-coder.com>
 
 RUN apk update
 RUN apk add docker
 RUN apk add py-pip
-
-RUN pip install docker-compose
 RUN apk add bash
-
+RUN apk add gzip
 RUN rm -rf /var/cache/apk/*
 
-COPY docker_volume_backup.sh /
+RUN pip install docker-compose
 
-ENTRYPOINT ["/docker_volume_backup.sh", "/project/docker-compose.yml"]
+COPY docker_volume_backup.sh /
+COPY docker_backup_script.sh /
+ENTRYPOINT ["/docker_volume_backup.sh", "/project/docker-compose.yml", "/docker_backup_script.sh"]
