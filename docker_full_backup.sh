@@ -6,15 +6,14 @@ vdir=volumes
 compose_file_path=$1
 project_name=${2,,}
 backup_path=$3
-backup_or_restore=$4
-restore_date=$5
+backup_or_restore=${4:-backup}
+date_suffix=${5:-$(date -I)}
 
 set -e
 
 function backup_volume {
   volume_name=$1
   backup_destination=$2
-  date_suffix=$(date -I)
 
   docker run --rm -v $volume_name:/data -v $backup_destination:/backup $alpine tar -zcvf /backup/$vdir/$volume_name-$date_suffix.tar.gz /data
 }
@@ -22,7 +21,6 @@ function backup_volume {
 function backup_container {
   container_id=$1
   backup_destination=$2
-  date_suffix=$(date -I)
   fname="$backup_destination/$cdir/$container_id-$date_suffix.tar.gz"
 
   docker export $container_id | gzip > $fname
@@ -31,7 +29,7 @@ function backup_container {
 function restore_volume {
   volume_name=$1
   backup_destination=$2
-  date=$3
+  date=$date_suffix
 
   docker run --rm -v $volume_name:/data $alpine find /data -mindepth 1 -delete
   docker run --rm -v $volume_name:/data -v $backup_destination:/backup $alpine tar -xvf /backup/$vdir/$volume_name-$date.tar.gz -C .
@@ -40,7 +38,7 @@ function restore_volume {
 function restore_container {
   container_id=$1
   backup_destination=$2
-  date=$3
+  date=$date_suffix
   fname="$backup_destination/$cdir/$container_id-$date_suffix.tar.gz"
 
   ["$(docker ps -a | grep $container_id)"] && docker rm -f $container_id
@@ -75,7 +73,7 @@ function main {
     if [ "$backup_or_restore" == "restore" ]
     then
       echo "  restore container from backup: $c"
-      restore_container $c $backup_path $restore_date
+      restore_container $c $backup_path
     fi
   done
 
@@ -94,12 +92,16 @@ function main {
     if [ "$backup_or_restore" == "restore" ]
     then
       echo "  restore volume from backup: $v"
-      restore_volume $v $backup_path $restore_date
+      restore_volume $v $backup_path 
     fi
   done
 
   echo "  restarting containers"
   docker-compose -f $compose_file_path -p $project_name start
+
+  # write date_id to file
+  echo "$date_suffix" >> "$backup_path/stored-backups.ids"
+
   echo "finished"
 }
 
