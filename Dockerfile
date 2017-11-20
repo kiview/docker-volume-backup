@@ -11,5 +11,5 @@ RUN rm -rf /var/cache/apk/*
 RUN pip install docker-compose
 
 COPY docker_volume_backup.sh /
-COPY docker_backup_script.sh /
+COPY docker_full_backup.sh   /
 ENTRYPOINT ["/docker_volume_backup.sh", "/project/docker-compose.yml", "/docker_full_backup.sh"]
