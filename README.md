@@ -6,7 +6,6 @@ Scripts for easy backup and restore of Docker volumes
 ```bash
 ./docker_volume_backup.sh {compose_file_path} {project_name} {backup_path} {backup_or_restore} {restore_date}
 ```
-Note: The compose file is not parsed yet. The containing scripts only wokrs with default names for the volumes (containers). Check after each update manuelly if the script works correctly.
 
 ## Examples
 

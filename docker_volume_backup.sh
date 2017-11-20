@@ -31,11 +31,12 @@ function main {
   docker-compose -f $compose_file_path -p $project_name stop
 
   echo "Mounting volumes and performing backup/restore..."
-  declare -a volumes=()
-  readarray -t volumes < <(docker volume ls -f name=$project_name | awk '{if (NR > 1) print $2}')
-
-  for v in "${volumes[@]}"
-  do
+  #declare -a volumes=()
+  #readarray -t volumes < <(docker volume ls -f name=$project_name | awk '{if (NR > 1) print $2}')
+  #for v in "${volumes[@]}" ; do
+  docker-compose -f $compose_file_path -p $project_name config --volumes | while read -sr line ; do
+    # TODO: if it possible to get volumes ID's, put it in here!
+    v="${project_name}_$line"
     if [ "$backup_or_restore" == "backup" ]
     then
       echo "Perform backup"

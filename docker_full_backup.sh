@@ -9,6 +9,9 @@ backup_path=$3
 backup_or_restore=${4:-backup}
 date_suffix=${5:-$(date -I)}
 
+DO_CONTAINER=${EXCLUDE_CONTAINER:-0}
+DO_VOLUMES=${EXCLUDE_VOLUMES:-0}
+
 set -e
 
 function backup_volume {
@@ -49,7 +52,7 @@ function restore_container {
 function main {
   echo "Docker backup script for project: $project_name"
   echo "  mode: $backup_or_restore"
-  
+
   if [ "$backup_or_restore" == "backup" ] ; then
     mkdir -p $backup_path/$cdir
     mkdir -p $backup_path/$vdir
@@ -58,12 +61,16 @@ function main {
   echo "  stopping running containers"
   docker-compose -f $compose_file_path -p $project_name stop
 
+  if [ $DO_CONTAINER != 0 ] ; then
+    echo "  container are excluded"
+  else
   echo "  enter container images"
   #declare -a containers=()
   #readarray -t containers < <(docker container ls --all -f name=$project_name | awk '{if (NR > 1) print $1}')
   #for c in "${containers[@]}"
   #do
-  docker ps --all --quiet -f name=$project_name | while read -sr c ; do
+  #docker ps --all --quiet -f name=$project_name | while read -sr c ; do
+  docker-compose -f $compose_file_path -p $project_name ps -q | while read -sr c ; do
     if [ "$backup_or_restore" == "backup" ]
     then
       echo "  perform container backup: $c"
@@ -76,13 +83,18 @@ function main {
       restore_container $c $backup_path
     fi
   done
+  fi
 
+  if [ $DO_VOLUMES != 0 ] ; then
+    echo "  volumes are excluded"
+  else
   echo "  mounting volumes and performing backup/restore..."
-  declare -a volumes=()
-  readarray -t volumes < <(docker volume ls -f name=$project_name | awk '{if (NR > 1) print $2}')
-
-  for v in "${volumes[@]}"
-  do
+  #declare -a volumes=()
+  #readarray -t volumes < <(docker volume ls -f name=$project_name | awk '{if (NR > 1) print $2}')
+  #for v in "${volumes[@]}" ; do
+  docker-compose -f $compose_file_path -p $project_name config --volumes | while read -sr line ; do
+    # TODO: if it possible to get volumes ID's, put it in here!
+    v="${project_name}_$line"
     if [ "$backup_or_restore" == "backup" ]
     then
       echo "  perform volume backup: $v"
@@ -92,9 +104,10 @@ function main {
     if [ "$backup_or_restore" == "restore" ]
     then
       echo "  restore volume from backup: $v"
-      restore_volume $v $backup_path 
+      restore_volume $v $backup_path
     fi
   done
+  fi
 
   echo "  restarting containers"
   docker-compose -f $compose_file_path -p $project_name start
